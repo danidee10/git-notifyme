@@ -12,15 +12,6 @@ hashes = {
     'latest_hash': None
 }
 
-# experimental decorator to execute thread after n seconds
-def execute_every(interval):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            return threading.Timer(interval, func)
-        return wrapper
-    return decorator
-
-
 extract_info = {
     'commiter': '--format=%cn',
     'commiter_email': '--format=%ce',
@@ -29,7 +20,6 @@ extract_info = {
     'author_name': '--format=%an'
 }
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('repo', type=str, nargs='+')
@@ -37,7 +27,7 @@ def parse_args():
                         help='Remote url of the repo, defaults to origin')
     parser.add_argument('--branch', type=str, default='master',
                         help='Repository branch to watch, defaults to master')
-    parser.add_argument('--interval', type=str,
+    parser.add_argument('--interval', type=str, default='00:00:59',
                         help='Interval to check for updates, format is hh:mm:ss')
 
     args = parser.parse_args()
@@ -60,9 +50,18 @@ def interval_to_secs(interval):
     return interval
 
 def check_for_updates(repo, remote):
-
     # fetch from remote and get hash again
-    subprocess.check_output(['git fetch {}'.format(remote.split('/')[0])], cwd=repo, shell=True)
+    try:
+        output = subprocess.check_output(['git fetch {}'.format(remote.split('/')[0])], cwd=repo, shell=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        if any(err in e.output.decode('utf-8') for err in ['Could not resolve', '443', 'Connection timed out']):
+            message='Connection error on {}'.format(os.path.basename(repo))
+            subprocess.call(['notify-send', message])
+            return
+        else:
+            print('{} is not a valid git repository'.format(os.path.basename(repo)))
+            sys.exit(1)
+
     latest_hash = subprocess.check_output(['git rev-parse {}'.format(remote)], cwd=repo, shell=True)
     hashes['latest_hash'] = latest_hash.decode('utf-8').strip('\n')
 
@@ -90,6 +89,8 @@ def main():
         print('==========checking for updates=============')
         for repo in repos:
             check_for_updates(repo, remote)
+            # Sleep a little so the user has enough time to read the info (when watches > 1 repos)
+            time.sleep(2)
 
         time.sleep(interval)
 
