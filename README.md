@@ -1,6 +1,6 @@
 # git-notifyme
 
-A python script to watch and notify you of commits on various branches of your git repositories
+A python script to watch and notify you of commits on various branches of your git repositories.
 
 # Usage
 
@@ -16,7 +16,7 @@ git-notify doesn't get in your way when watching for updates (it only does a `fe
 
 # Notes
 
-For now there is no support to watch two or more branches at the same time, but this is a feature i'm actively working on
+For now there is no support to watch two or more branches at the same time, but this is a feature i'm actively working on.
 
 # Found it interesting or useful?
 
