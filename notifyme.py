@@ -69,16 +69,16 @@ def check_for_updates(repo, remote):
     if hashes['latest_hash'] != hashes['current_hash']:
         hashes['current_hash'] = hashes['latest_hash']
 
-        commiter, committer_email, commit_subject = get_commit_details(repo)
+        commiter, committer_email, commit_subject = get_commit_details(repo, remote)
 
         message = "New commit(s) on {}\nCommiter: {}Commiter email: {}Subject: {}".format(os.path.basename(repo), commiter, committer_email, commit_subject)
 
         subprocess.call(['notify-send', message])
 
-def get_commit_details(repo):
-    commiter = subprocess.check_output(['git log -1 {}'.format(extract_info['commiter'])], cwd=repo, shell=True).decode('utf-8')
-    commiter_email = subprocess.check_output(['git log -1 {}'.format(extract_info['commiter_email'])], cwd=repo, shell=True).decode('utf-8')
-    commit_subject = subprocess.check_output(['git log -1 {}'.format(extract_info['commit_subject'])], cwd=repo, shell=True).decode('utf-8')
+def get_commit_details(repo, remote):
+    commiter = subprocess.check_output(['git log {} -1 {}'.format(remote, extract_info['commiter'])], cwd=repo, shell=True).decode('utf-8')
+    commiter_email = subprocess.check_output(['git log {} -1 {}'.format(remote, extract_info['commiter_email'])], cwd=repo, shell=True).decode('utf-8')
+    commit_subject = subprocess.check_output(['git log {} -1 {}'.format(remote, extract_info['commit_subject'])], cwd=repo, shell=True).decode('utf-8')
 
     return commiter, commiter_email, commit_subject
 
