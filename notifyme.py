@@ -51,6 +51,7 @@ def interval_to_secs(interval):
 
 def check_for_updates(repo, remote):
     # fetch from remote and get hash again
+    print('==========checking for updates=============')
     try:
         output = subprocess.check_output(['git fetch {}'.format(remote.split('/')[0])], cwd=repo, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
@@ -86,7 +87,6 @@ def main():
     interval = interval_to_secs(interval)
 
     while True:
-        print('==========checking for updates=============')
         for repo in repos:
             check_for_updates(repo, remote)
             # Sleep a little so the user has enough time to read the info (when watches > 1 repos)
