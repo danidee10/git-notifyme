@@ -62,6 +62,7 @@ def interval_to_secs(interval):
 def check_for_updates(repo, remote):
 
     # fetch from remote and get hash again
+    subprocess.check_output(['git fetch {}'.format(remote.split('/')[0])], cwd=repo, shell=True)
     latest_hash = subprocess.check_output(['git rev-parse {}'.format(remote)], cwd=repo, shell=True)
     hashes['latest_hash'] = latest_hash.decode('utf-8').strip('\n')
 
