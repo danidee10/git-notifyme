@@ -5,8 +5,8 @@ import subprocess
 import time
 import os
 
-# Because i didn't want to use a global variable to keep track of current_hash and update it
-#TODO Fix this when i'm not tired as f**k
+# Because i didn't want to use global variables
+# TODO Fix this when i'm not tired as f**k
 hashes = {
     'current_hash': None,
     'latest_hash': None
@@ -19,6 +19,7 @@ extract_info = {
     'commit_subject': '--format=%s',
     'author_name': '--format=%an'
 }
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -36,8 +37,9 @@ def parse_args():
 
     return repo, remote, branch, interval
 
+
 def interval_to_secs(interval):
-    #convert interval to seconds
+    # convert interval to seconds
     try:
         interval = datetime.strptime(interval, '%H:%M:%S')
     except ValueError:
@@ -45,9 +47,10 @@ def interval_to_secs(interval):
         sys.exit(1)
 
     interval = timedelta(hours=interval.hour, minutes=interval.minute, seconds=interval.second)
-    interval  = interval.total_seconds()
+    interval = interval.total_seconds()
 
     return interval
+
 
 def check_for_updates(repo, remote):
     # fetch from remote and get hash again
@@ -56,7 +59,7 @@ def check_for_updates(repo, remote):
         output = subprocess.check_output(['git fetch {}'.format(remote.split('/')[0])], cwd=repo, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         if any(err in e.output.decode('utf-8') for err in ['Could not resolve', '443', 'Connection timed out']):
-            message='Connection error on {}'.format(os.path.basename(repo))
+            message = 'Connection error on {}'.format(os.path.basename(repo))
             subprocess.call(['notify-send', message])
             return
         else:
@@ -75,12 +78,14 @@ def check_for_updates(repo, remote):
 
         subprocess.call(['notify-send', message])
 
+
 def get_commit_details(repo, remote):
     commiter = subprocess.check_output(['git log {} -1 {}'.format(remote, extract_info['commiter'])], cwd=repo, shell=True).decode('utf-8')
     commiter_email = subprocess.check_output(['git log {} -1 {}'.format(remote, extract_info['commiter_email'])], cwd=repo, shell=True).decode('utf-8')
     commit_subject = subprocess.check_output(['git log {} -1 {}'.format(remote, extract_info['commit_subject'])], cwd=repo, shell=True).decode('utf-8')
 
     return commiter, commiter_email, commit_subject
+
 
 def main():
     repos, remote, branch, interval = parse_args()
